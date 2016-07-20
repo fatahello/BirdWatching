@@ -6,51 +6,76 @@ import java.util.Random;
 
 
 public class GameField {
-	
+
 	public enum PlacingMode {
-	    Custom, Random 
+	    Custom, Random
 	}
-	
+
 	List<Bird> birds;
 	int width;
-	int height; 
+	int height;
 	int depth;
 	boolean gameStarted;
-	private FieldSize fieldSize;
-	
+	private final FieldSize fieldSize;
 
-	public GameField(int width, int height, int depth, FieldSize fieldSize) {
+
+	public GameField(final int width, final int height, final int depth, final FieldSize fieldSize) {
 		this.width = width;
 		this.height = height;
 		this.depth = depth;
 		this.fieldSize = fieldSize;
 		birds = new ArrayList<Bird>();
 	}
-	
-	public void addBird(Bird b) {
+
+	public void addBird(final Bird b) {
 		birds.add(b);
 	}
-	
-	
-	//Start the game
-	public boolean startGame(PlacingMode pm) {
-		try {
-			placeBirds(pm);
-			gameStarted = (birds.size() > 0 && isGameFieldValid());
-		} catch (Exception e) {
-			gameStarted = false;
+
+	//Check if the GameField is Valid
+	private boolean isGameFieldValid()
+	{
+		boolean isValid = true;
+		for(final Bird bird : birds) {
+			final int h = bird.getHeight();
+			final Location location = bird.getLocation();
+			final int x = location.x;
+			final int y = location.y;
+			isValid =  fieldSize.isWithinField(h, x, y);
+			if (!isValid) {
+				break;
+			}
 		}
-		return gameStarted;
+		return isValid;
+
 	}
-	
+
+	//Place the birds on the fields
+	private void placeBirds(final PlacingMode type) throws Exception {
+
+		//Random Distribution
+		if (type == PlacingMode.Random) {
+			for(final Bird bird : birds) {
+				final Location location = new Location(new Random().nextInt(this.width), new Random().nextInt(this.height));
+				bird.setLocation(location);
+				if (!(bird instanceof Chicken)) {
+					bird.setHeight(new Random().nextInt(this.depth));
+				}
+			}
+		}
+		//Custom Distribution
+		else if (type == PlacingMode.Custom) {
+
+		}
+	}
+
 	//Shot to a bird
-	public boolean shot(int x, int y, int h) {
+	public boolean shot(final int x, final int y, final int h) {
 		boolean hit = false;
 		if (gameStarted)
 		{
-			for(Bird bird : birds) {
-				int height = bird.getHeight();
-				Location location = bird.getLocation();
+			for(final Bird bird : birds) {
+				final int height = bird.getHeight();
+				final Location location = bird.getLocation();
 				hit =  location.x == x && location.y == y && height == h;
 				if (hit)
 				{
@@ -59,43 +84,24 @@ public class GameField {
 				}
 			}
 		}
-         return hit;   
+         return hit;
 	}
-	
-	//Place the birds on the fields
-	private void placeBirds(PlacingMode type) throws Exception {
-			
-		//Random Distribution
-		if (type == PlacingMode.Random) {
-			for(Bird bird : birds) {
-				Location location = new Location(new Random().nextInt(this.width), new Random().nextInt(this.height));
-				bird.setLocation(location);
-				if (!(bird instanceof Chicken))
-					bird.setHeight(new Random().nextInt(this.depth));
-			}
-		} 
-		//Custom Distribution
-		else if (type == PlacingMode.Custom) {
-			
+
+	/**
+	 * Starta the game
+	 *
+	 * @param pm
+	 * @return
+	 */
+	public boolean startGame(final PlacingMode pm) {
+		try {
+			placeBirds(pm);
+			gameStarted = (birds.size() > 0 && isGameFieldValid());
+		} catch (final Exception e) {
+			gameStarted = false;
 		}
+		return gameStarted;
 	}
-	
-	//Check if the GameField is Valid
-	private boolean isGameFieldValid()
-	{
-		boolean isValid = true;
-		for(Bird bird : birds) {
-			int h = bird.getHeight();
-			Location location = bird.getLocation();
-			int x = location.x;
-			int y = location.y;
-			isValid =  fieldSize.isWithinField(h, x, y);
-			if (!isValid)
-				break;
-		}
-		return isValid;
-		
-	}
-	
+
 
 }
