@@ -21,5 +21,13 @@ public abstract class Bird {
 		return location;
 	}
 	
+	@Override
+	public String toString(){
+		if (location == null){
+			return "null";
+		}
+		return location.toString();
+	}
+	
 	public abstract void sing();
 }
